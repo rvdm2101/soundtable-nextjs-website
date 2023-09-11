@@ -1,7 +1,3 @@
-export default function Layout({ children }) {
-    return (
-        <>
-            {children}
-        </>
-    )
+export default function Layout({ children }: { children: any }) {
+  return children;
 }
