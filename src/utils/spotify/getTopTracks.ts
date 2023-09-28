@@ -1,12 +1,8 @@
-import {fetchWebApi} from "@/utils/spotify/fetchApi";
+import { fetchWebApi } from '@/utils/spotify/fetchApi';
 
-type TGetTopTracks = (numberOfTracks: number) => any;
+export async function getTopTracks(numberOfTracks: number) {
+  const tracks = (await fetchWebApi(`v1/me/top/tracks?time_range=short_term&limit=${numberOfTracks}`, 'GET'));
 
-export async function getTopTracks<TGetTopTracks>(numberOfTracks) {
-    const tracks = (await fetchWebApi(
-        `v1/me/top/tracks?time_range=short_term&limit=${numberOfTracks}`, 'GET'
-    ));
-
-    console.log(tracks);
-    return tracks;
+  console.log(tracks);
+  return tracks;
 }

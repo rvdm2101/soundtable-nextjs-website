@@ -1,4 +1,4 @@
-import type { RequestAccessTokenResponse } from "@/utils/spotify/spotifyApi";
+import type { RequestAccessTokenResponse } from '@/utils/spotify/spotifyApi';
 
 const generateRandomString = (length: number) => {
   let text = '';
@@ -93,19 +93,19 @@ export async function requestAccessToken(authorizationCode: string) {
       }
       return response.json() as Promise<RequestAccessTokenResponse>;
     })
-      .then((data) => {
-        if (data.access_token) {
-          localStorage.setItem('access_token', data.access_token);
-        }
-        if (data.refresh_token) {
-          localStorage.setItem('refresh_token', data.refresh_token);
-        }
-        return data;
-      })
+    .then((data) => {
+      if (data.access_token) {
+        localStorage.setItem('access_token', data.access_token);
+      }
+      if (data.refresh_token) {
+        localStorage.setItem('refresh_token', data.refresh_token);
+      }
+      return data;
+    })
     .catch((error) => {
       console.error('Error:', error);
     });
-  return fetchResponse?.access_token;
+  return fetchResponse?.access_token || null;
 }
 
 export const refreshAccessToken = () => {};
