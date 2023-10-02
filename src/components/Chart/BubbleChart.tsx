@@ -24,6 +24,7 @@ function BubbleChart({ data }: BubbleChartProps) {
     const height = 500;
     const width = 500;
     const radius = 6;
+    const maxZoom = 40;
 
     const svg = d3.select(ref.current);
     svg.selectAll('g').remove();
@@ -34,7 +35,7 @@ function BubbleChart({ data }: BubbleChartProps) {
     }
 
     const zoom = d3.zoom()
-      .scaleExtent([1, 40])
+      .scaleExtent([1, maxZoom])
       .on('zoom', zoomed);
 
     function random() {
@@ -42,7 +43,7 @@ function BubbleChart({ data }: BubbleChartProps) {
       svg.transition().duration(2500).call(
         // @ts-ignore
         zoom.transform,
-        d3.zoomIdentity.translate(width / 2, height / 2).scale(40).translate(-dataElement.x, -dataElement.y),
+        d3.zoomIdentity.translate(width / 2, height / 2).scale(maxZoom).translate(-dataElement.x, -dataElement.y),
       );
     }
 
@@ -67,14 +68,14 @@ function BubbleChart({ data }: BubbleChartProps) {
         currentSvgZoomScale = d3.zoomTransform(svgNode).k;
       }
 
-      if (currentSvgZoomScale > 1) {
+      if (currentSvgZoomScale === maxZoom) {
         reset();
         return;
       }
       svg.transition().duration(750).call(
         // @ts-ignore
         zoom.transform,
-        d3.zoomIdentity.translate(width / 2, height / 2).scale(40).translate(-dataElement.x, -dataElement.y),
+        d3.zoomIdentity.translate(width / 2, height / 2).scale(maxZoom).translate(-dataElement.x, -dataElement.y),
         d3.pointer(event),
       );
     }
