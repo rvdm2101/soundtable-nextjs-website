@@ -7,12 +7,12 @@ export async function fetchWebApi(endpoint: string, method: string, body: BodyIn
   if (code && (!accessToken || accessToken === 'undefined')) {
     accessToken = await requestAccessToken(code);
   }
-  const resp = await fetch(`https://api.spotify.com/${endpoint}`, {
+  return fetch(`https://api.spotify.com/${endpoint}`, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
     method,
-    body: JSON.stringify(body),
+    body: body ? JSON.stringify(body) : null,
   }).then((response) => {
     if (!response.ok) {
       throw new Error(`HTTP status ${response.status}`);
@@ -22,7 +22,4 @@ export async function fetchWebApi(endpoint: string, method: string, body: BodyIn
     .catch((error) => {
       console.error('Error:', error);
     });
-
-  console.log(resp);
-  return resp;
 }

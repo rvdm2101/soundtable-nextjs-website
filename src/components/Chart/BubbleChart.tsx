@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 export type BubbleChartData = {
   x: number,
   y: number,
+  radius: number,
   color: string,
+  title: string,
 };
 
 interface BubbleChartProps {
@@ -59,6 +61,16 @@ function BubbleChart({ data }: BubbleChartProps) {
 
     function clicked(event: any, dataElement: BubbleChartData) {
       event.stopPropagation();
+      const svgNode = svg.node();
+      let currentSvgZoomScale = 1;
+      if (svgNode) {
+        currentSvgZoomScale = d3.zoomTransform(svgNode).k;
+      }
+
+      if (currentSvgZoomScale > 1) {
+        reset();
+        return;
+      }
       svg.transition().duration(750).call(
         // @ts-ignore
         zoom.transform,
@@ -70,14 +82,24 @@ function BubbleChart({ data }: BubbleChartProps) {
     svg.attr('viewBox', [0, 0, width, height]);
     svg.on('click', reset);
 
-    g.selectAll('circle')
+    const circles = g.selectAll('circle')
       .data(data)
-      .join('circle')
+      .enter()
+      .append('g');
+
+    circles.append('circle')
       .attr('cx', (dataElement) => dataElement.x)
       .attr('cy', (dataElement) => dataElement.y)
       .attr('r', radius)
       .attr('fill', (d) => d.color)
       .on('click', clicked);
+
+    circles.append('text')
+      .attr('x', (dataElement) => dataElement.x - radius + 1)
+      .attr('y', (dataElement) => dataElement.y)
+      .attr('dy', '.35em')
+      .attr('class', 'bubbleTitle')
+      .text((dataElement) => dataElement.title);
 
     // @ts-ignore
     svg.call(zoom);
