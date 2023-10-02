@@ -1,7 +1,17 @@
 import * as d3 from 'd3';
 import { useEffect, useRef, useState } from 'react';
 
-function BubbleChart() {
+export type BubbleChartData = {
+  x: number,
+  y: number,
+  color: string,
+};
+
+interface BubbleChartProps {
+  data: BubbleChartData[];
+}
+
+function BubbleChart({ data }: BubbleChartProps) {
   const ref = useRef(null);
   const [zoomIn, setZoomIn] = useState<() => void>(() => {});
   const [zoomOut, setZoomOut] = useState<() => void>(() => {});
@@ -12,18 +22,6 @@ function BubbleChart() {
     const height = 500;
     const width = 500;
     const radius = 6;
-    const step = radius * 2;
-    const theta = Math.PI * (3 - Math.sqrt(5));
-
-    const data = Array.from({ length: 2000 }, (_, i) => {
-      const updatedI = i + 0.5;
-      const dataRadius = step * Math.sqrt(updatedI);
-      const a = theta * updatedI;
-      return [
-        width / 2 + dataRadius * Math.cos(a),
-        height / 2 + dataRadius * Math.sin(a),
-      ];
-    });
 
     const svg = d3.select(ref.current);
     svg.selectAll('g').remove();
@@ -38,11 +36,11 @@ function BubbleChart() {
       .on('zoom', zoomed);
 
     function random() {
-      const [x, y] = data[Math.floor(Math.random() * data.length)];
+      const dataElement = data[Math.floor(Math.random() * data.length)];
       svg.transition().duration(2500).call(
         // @ts-ignore
         zoom.transform,
-        d3.zoomIdentity.translate(width / 2, height / 2).scale(40).translate(-x, -y),
+        d3.zoomIdentity.translate(width / 2, height / 2).scale(40).translate(-dataElement.x, -dataElement.y),
       );
     }
 
@@ -59,12 +57,12 @@ function BubbleChart() {
       );
     }
 
-    function clicked(event: any, [x, y]: any[]) {
+    function clicked(event: any, dataElement: BubbleChartData) {
       event.stopPropagation();
       svg.transition().duration(750).call(
         // @ts-ignore
         zoom.transform,
-        d3.zoomIdentity.translate(width / 2, height / 2).scale(40).translate(-x, -y),
+        d3.zoomIdentity.translate(width / 2, height / 2).scale(40).translate(-dataElement.x, -dataElement.y),
         d3.pointer(event),
       );
     }
@@ -75,10 +73,10 @@ function BubbleChart() {
     g.selectAll('circle')
       .data(data)
       .join('circle')
-      .attr('cx', ([x]) => x)
-      .attr('cy', ([, y]) => y)
+      .attr('cx', (dataElement) => dataElement.x)
+      .attr('cy', (dataElement) => dataElement.y)
       .attr('r', radius)
-      .attr('fill', (d, i) => d3.interpolateRainbow(i / 360))
+      .attr('fill', (d) => d.color)
       .on('click', clicked);
 
     // @ts-ignore
@@ -90,7 +88,7 @@ function BubbleChart() {
     setZoomOut(() => svg.transition().call(zoom.scaleBy, 0.5));
     setZoomRandom(() => random);
     setZoomReset(() => reset);
-  }, []);
+  }, [data]);
 
   return (
     <div>
