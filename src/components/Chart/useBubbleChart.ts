@@ -7,6 +7,7 @@ const MAX_ZOOM_LEVEL = 40;
 export const SVG_WIDTH = 500;
 export const SVG_HEIGHT = 500;
 export const BUBBLE_RADIUS = 6;
+const ZOOM_DURATION = 2500;
 
 export type BubbleChartData = {
   x: number,
@@ -32,40 +33,52 @@ export const useBubbleChart = (data: BubbleChartData[]): IUseBubbleChart => {
 
   useEffect(() => {
     const svg = d3.select(ref.current);
+    svg.attr('viewBox', [0, 0, SVG_WIDTH, SVG_HEIGHT]);
+    // Remove previously drawn content
     svg.selectAll('g').remove();
-    const g = svg.append('g');
 
-    function zoomed({ transform }: { transform: any }) {
-      g.attr('transform', transform);
-    }
+    const g = svg.append('g');
 
     const zoom = d3.zoom()
       .scaleExtent([1, MAX_ZOOM_LEVEL])
-      .on('zoom', zoomed);
+      .on('zoom', ({ transform }: { transform: any }) => {
+        g.attr('transform', transform);
+      });
 
-    function random() {
-      const dataElement = data[Math.floor(Math.random() * data.length)];
-      svg.transition().duration(2500).call(
+    const goToBubble = (
+      dataElement: BubbleChartData,
+      pointer?: [number, number],
+    ) => {
+      svg.transition().duration(ZOOM_DURATION).call(
         // @ts-ignore
         zoom.transform,
-        d3.zoomIdentity.translate(SVG_WIDTH / 2, SVG_HEIGHT / 2).scale(MAX_ZOOM_LEVEL).translate(-dataElement.x, -dataElement.y),
+        d3.zoomIdentity
+          .translate(SVG_WIDTH / 2, SVG_HEIGHT / 2)
+          .scale(MAX_ZOOM_LEVEL)
+          .translate(-dataElement.x, -dataElement.y),
+        pointer,
       );
-    }
+    };
 
-    function reset() {
+    const goToRandomBubble = () => {
+      const dataElement = data[Math.floor(Math.random() * data.length)];
+      goToBubble(dataElement);
+    };
+
+    const resetView = () => {
       const node = svg.node();
       if (!node) {
         return;
       }
-      svg.transition().duration(750).call(
+      svg.transition().duration(ZOOM_DURATION).call(
         // @ts-ignore
         zoom.transform,
         d3.zoomIdentity,
         d3.zoomTransform(node).invert([SVG_WIDTH / 2, SVG_HEIGHT / 2]),
       );
-    }
+    };
 
-    function clicked(event: any, dataElement: BubbleChartData) {
+    const clicked = (event: any, dataElement: BubbleChartData) => {
       event.stopPropagation();
       const svgNode = svg.node();
       let currentSvgZoomScale = 1;
@@ -74,20 +87,13 @@ export const useBubbleChart = (data: BubbleChartData[]): IUseBubbleChart => {
       }
 
       if (currentSvgZoomScale === MAX_ZOOM_LEVEL) {
-        reset();
+        resetView();
         return;
       }
-      svg.transition().duration(750).call(
-        // @ts-ignore
-        zoom.transform,
-        d3.zoomIdentity.translate(SVG_WIDTH / 2, SVG_HEIGHT / 2).scale(MAX_ZOOM_LEVEL).translate(-dataElement.x, -dataElement.y),
-        d3.pointer(event),
-      );
-    }
+      goToBubble(dataElement, d3.pointer(event));
+    };
 
-    svg.attr('viewBox', [0, 0, SVG_WIDTH, SVG_HEIGHT]);
-    svg.on('click', reset);
-
+    // Add the bubbles and text
     const circles = g.selectAll('circle')
       .data(data)
       .enter()
@@ -109,13 +115,14 @@ export const useBubbleChart = (data: BubbleChartData[]): IUseBubbleChart => {
 
     // @ts-ignore
     svg.call(zoom);
+    svg.on('click', resetView);
 
     // @ts-ignore
     setZoomIn(() => svg.transition().call(zoom.scaleBy, 2));
     // @ts-ignore
     setZoomOut(() => svg.transition().call(zoom.scaleBy, 0.5));
-    setZoomRandom(() => random);
-    setZoomReset(() => reset);
+    setZoomRandom(() => goToRandomBubble);
+    setZoomReset(() => resetView);
   }, [data]);
 
   return {
