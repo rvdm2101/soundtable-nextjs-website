@@ -9,16 +9,17 @@ export async function fetchWebApi(endpoint: string, method: string, body: BodyIn
   }
   return fetch(`https://api.spotify.com/${endpoint}`, {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`
     },
     method,
-    body: body ? JSON.stringify(body) : null,
-  }).then((response) => {
-    if (!response.ok) {
-      throw new Error(`HTTP status ${response.status}`);
-    }
-    return response.json();
+    body: body ? JSON.stringify(body) : null
   })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP status ${response.status}`);
+      }
+      return response.json();
+    })
     .catch((error) => {
       console.error('Error:', error);
     });

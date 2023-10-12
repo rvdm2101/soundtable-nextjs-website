@@ -13,7 +13,7 @@ export default function Dashboard() {
     const step = BUBBLE_RADIUS * 2;
     const theta = Math.PI * (3 - Math.sqrt(5));
 
-    getTopTracks(50).then((tracks) => {
+    getTopTracks(99).then((tracks) => {
       setData(
         tracks.map((track, i) => {
           const updatedI = i + 0.5;
