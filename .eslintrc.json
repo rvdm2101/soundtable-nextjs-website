@@ -1,17 +1,21 @@
 {
-  "extends": [
-    "next/core-web-vitals",
-    "airbnb",
-    "airbnb-typescript"
-  ],
-  "parserOptions": {
-    "project": "./tsconfig.json"
+  "env": {
+    "browser": true,
+    "es2021": true
   },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint", "react"],
   "rules": {
-    "react/jsx-props-no-spreading": "off",
-    "react/jsx-no-constructed-context-values": "off",
-    "react/react-in-jsx-scope": "off",
-    "import/prefer-default-export": "off",
-    "max-len": [2, 120]
+    "react/react-in-jsx-scope": "off"
   }
 }
